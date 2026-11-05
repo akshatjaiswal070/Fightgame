@@ -36,34 +36,9 @@ function stage3d(){if(!world)return;const {T,scene,stage}=world;if(world.theme==
 for(let i=0;i<15;i++){let x=(i-7)*2.8,z=-5-(i%3)*3,h=2+(i*7%6);if(arenaStage===1){box3d(stage,2,h,2,0x292b49,x,h/2,z);for(let j=0;j<3;j++)box3d(stage,.32,.55,.03,0x9cdcf2,x-.5+j*.5,h*.7,z+1.02)}else if(arenaStage===3){box3d(stage,2,1.7,2,0xddc19a,x,.85,z);mesh3d(stage,new T.ConeGeometry(1.7,1,4),0xa84b37,x,2.2,z).rotation.y=Math.PI/4}else if(arenaStage===4){box3d(stage,.2,3,.2,0xc7b28a,x,1.5,-5);box3d(stage,2.8,.08,.08,0xbe6252,x,1.4,-5);box3d(stage,2.8,.08,.08,0xbe6252,x,2,-5)}else mesh3d(stage,new T.ConeGeometry(2.6,h+3,5),arenaStage===2?0x813d56:0x527b73,x,(h+3)/2,z)}
 if(arenaStage===1){let ring=mesh3d(stage,new T.TorusGeometry(2,.12,12,64),0xac8cff,0,4,-8);ring.material.emissive.set(0x6733bb)}if(arenaStage===2)mesh3d(stage,new T.SphereGeometry(2,24,16),0xeaa8a1,7,7,-12);if(arenaStage===5){box3d(stage,4,2,3,0x9b5137,0,1,-6);mesh3d(stage,new T.ConeGeometry(3.5,1.8,4),0xe0b350,0,3,-6).rotation.y=Math.PI/4;}
 }
-// Sculpted facial features use real geometry, so profiles remain visible in 3D.
-function face3d(body,ch){const T=world.T,head=new T.Group();head.position.y=2.46;body.add(head);
- const oval=(color,x,y,z,sx,sy,sz)=>{const m=mesh3d(head,new T.SphereGeometry(1,20,14),color,x,y,z);m.scale.set(sx,sy,sz);return m};
- const skin=ch.skin,monkey=ch.name==='Wukong';
- oval(skin,0,0,0,.275,.335,.245);oval(skin,0,-.18,.075,.21,.17,.185);
- oval(skin,-.278,0,0,.055,.095,.055);oval(skin,.278,0,0,.055,.095,.055);
- oval('#a96954',-.292,0,.025,.018,.05,.025);oval('#a96954',.292,0,.025,.018,.05,.025);
- if(monkey){oval('#e1b17f',0,-.06,.19,.225,.21,.105)}
- // Brow, whites, irises and pupils are separate shapes rather than a painted band.
- for(const side of [-1,1]){const x=side*.115;oval(skin,x,.078,.19,.105,.085,.07);oval('#f5eee4',x,.045,.242,.073,.038,.024);
- oval(ch.name==='Naruto'?'#3885ce':ch.name==='Gojo'?'#63d9ff':'#352923',x,.045,.265,.025,.029,.009);oval('#12121b',x,.045,.274,.012,.022,.005);oval('#ffffff',x-.009,.057,.279,.007,.008,.003);
- const brow=box3d(head,.145,.027,.032,ch.hair,x,.106,.245);brow.rotation.z=side*(ch.name==='Vegeta'? .28:.12);
- }
- oval(skin,0,-.015,.258,.038,.085,.052);oval(skin,0,-.07,.29,.052,.033,.045);
- for(const side of [-1,1])oval('#855446',side*.027,-.086,.313,.012,.008,.006);
- oval('#94594f',0,-.159,.239,.087,.018,.012);box3d(head,.13,.008,.012,'#573d3b',0,-.164,.252);
- if(ch.name==='Gojo'){box3d(head,.53,.12,.065,'#161625',0,.055,.25);for(const side of [-1,1])box3d(head,.04,.12,.36,'#161625',side*.263,.055,.055)}
- if(ch.name==='Naruto'){box3d(head,.52,.09,.065,'#30354a',0,.22,.19);box3d(head,.28,.075,.02,'#b9c6cc',0,.22,.232);for(const side of [-1,1])for(let j=0;j<3;j++){const mark=box3d(head,.09,.008,.012,'#805846',side*.174,-.075-j*.033,.23);mark.rotation.z=side*(.12-j*.12)}}
- // Different hair silhouettes retain each fighter's identity.
- oval(ch.hair,0,.235,-.065,.29,.16,.24);
- const count=ch.name==='Baki Hanma'?9:7;
- for(let i=0;i<count;i++){const x=(i%3-1)*.17,z=Math.floor(i/3)*.15-.16,length=ch.name==='Baki Hanma'?.22:ch.name==='Vegeta'?.57:.35+(i%3)*.08;const tuft=mesh3d(head,new T.ConeGeometry(.115,length,7),ch.hair,x,.3+length*.25,z);tuft.rotation.z=(i%3-1)*-.4;tuft.rotation.x=-.18}
- if(ch.name==='Vegeta'){const peak=mesh3d(head,new T.ConeGeometry(.075,.18,3),ch.hair,0,.22,.22);peak.rotation.z=Math.PI}
- return head;
-}
-function actor3d(ch,slot){const {T,scene}=world;let old=world.actors[slot];if(old?.name===ch.name)return old;if(old){scene.remove(old.root);dispose3d(old.root)}const root=new T.Group(),body=new T.Group();root.add(body);scene.add(root);const skin=ch.skin,col=ch.color;box3d(body,.72,1,.42,ch.name==='Baki Hanma'?skin:col,0,1.65,0);box3d(body,.76,.15,.46,ch.accent,0,1.2,0);const head=face3d(body,ch);if(ch.name==='Vegeta')box3d(body,.61,.68,.08,'#eee5ca',0,1.74,.24);if(ch.name==='Wukong'){box3d(body,.08,3.4,.08,'#e9bd54',-.56,1.7,-.22);box3d(head,.58,.08,.51,'#ebc75b',0,.24,0)}
+function actor3d(ch,slot){const {T,scene}=world;let old=world.actors[slot];if(old?.name===ch.name)return old;if(old){scene.remove(old.root);dispose3d(old.root)}const root=new T.Group(),body=new T.Group();root.add(body);scene.add(root);const skin=ch.skin,col=ch.color;box3d(body,.72,1,.42,ch.name==='Baki Hanma'?skin:col,0,1.65,0);box3d(body,.76,.15,.46,ch.accent,0,1.2,0);mesh3d(body,new T.SphereGeometry(.32,16,12),skin,0,2.46,0);for(let i=0;i<7;i++){let hair=mesh3d(body,new T.ConeGeometry(.14,.48+(i%3)*.1,5),ch.hair,(i%3-1)*.19,2.77,Math.floor(i/3)*.16-.16);hair.rotation.z=(i%3-1)*-.35}box3d(body,.48,.09,.06,ch.name==='Gojo'?'#111122':'#292323',0,2.5,.3);if(ch.name==='Naruto')box3d(body,.57,.13,.07,'#a5b1b8',0,2.68,.29);if(ch.name==='Vegeta')box3d(body,.61,.68,.08,'#eee5ca',0,1.74,.24);if(ch.name==='Wukong'){box3d(body,.08,3.4,.08,'#e9bd54',-.56,1.7,-.22);box3d(body,.58,.1,.51,'#ebc75b',0,2.7,0)}
 // Each limb has an elbow or knee, allowing a guarded stance and articulated strikes.
-const limbs=[],bends=[];for(let i=0;i<4;i++){const arm=i<2,joint=new T.Group(),bend=new T.Group(),length=arm?.38:.46;joint.position.set(arm?(i===0?-.48:.48):(i===2?-.24:.24),arm?2:1.15,arm?0:(i===2?.15:-.15));body.add(joint);mesh3d(joint,new T.CapsuleGeometry(arm?.12:.15,length-.12,4,8),arm?skin:col,0,-length/2,0);bend.position.y=-length;joint.add(bend);mesh3d(bend,new T.CapsuleGeometry(arm?.105:.13,length-.12,4,8),arm?skin:col,0,-length/2,0);box3d(bend,arm?.25:.3,.2,arm?.25:.46,ch.accent,0,-length,arm?0:.1);limbs.push(joint);bends.push(bend)}const aura=mesh3d(root,new T.TorusGeometry(1.35,.045,8,48),ch.accent,0,1.5,0);aura.visible=false;const beam=box3d(root,.2,.2,1,ch.accent,0,1.8,1);beam.material.emissive.set(ch.accent);beam.visible=false;return world.actors[slot]={root,body,head,limbs,bends,aura,beam,name:ch.name};}
+const limbs=[],bends=[];for(let i=0;i<4;i++){const arm=i<2,joint=new T.Group(),bend=new T.Group(),length=arm?.38:.46;joint.position.set(arm?(i===0?-.48:.48):(i===2?-.24:.24),arm?2:1.15,arm?0:(i===2?.15:-.15));body.add(joint);mesh3d(joint,new T.CapsuleGeometry(arm?.12:.15,length-.12,4,8),arm?skin:col,0,-length/2,0);bend.position.y=-length;joint.add(bend);mesh3d(bend,new T.CapsuleGeometry(arm?.105:.13,length-.12,4,8),arm?skin:col,0,-length/2,0);box3d(bend,arm?.25:.3,.2,arm?.25:.46,ch.accent,0,-length,arm?0:.1);limbs.push(joint);bends.push(bend)}const aura=mesh3d(root,new T.TorusGeometry(1.35,.045,8,48),ch.accent,0,1.5,0);aura.visible=false;const beam=box3d(root,.2,.2,1,ch.accent,0,1.8,1);beam.material.emissive.set(ch.accent);beam.visible=false;return world.actors[slot]={root,body,limbs,bends,aura,beam,name:ch.name};}
 // Animation follows attack time: anticipation, fast extension, then recovery.
 function fighter3d(f,slot){
  const a=actor3d(f.ch,slot),duration={punch:18,kick:21,grab:18,super:27,special1:25,special2:25,hurt:14}[f.action]||18;
@@ -72,7 +47,7 @@ function fighter3d(f,slot){
  const strike=rawStrike*rawStrike*(3-2*rawStrike);
  const windup=progress<.2?Math.sin(progress/.2*Math.PI):0;
  const walk=f.action==='walk'?Math.sin(f.walk)*.42:0,breath=Math.sin(elapsed*.055)*.018;
- a.root.position.set((f.x-480)/45,(417-f.y)/45,0);a.root.rotation.y=f.dir*Math.PI/2;a.head.rotation.y=-f.dir*.35;
+ a.root.position.set((f.x-480)/45,(417-f.y)/45,0);a.root.rotation.y=f.dir*Math.PI/2;
  a.body.rotation.set(.06,0,0);a.body.position.set(0,-.06+breath,0);
  for(let i=0;i<4;i++){a.limbs[i].rotation.set(0,0,0);a.bends[i].rotation.set(0,0,0)}
  a.limbs[0].rotation.x=-.65;a.limbs[1].rotation.x=-.8;
