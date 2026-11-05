@@ -92,8 +92,32 @@ function arena(){if(world){stage3d();return;}
  ctx.fillStyle='#ffe6ad77';ctx.fillRect(0,340,960,2);ctx.fillStyle='#ffffffb3';ctx.textAlign='center';ctx.font='600 11px sans-serif';ctx.fillText(stageNames[theme].toUpperCase(),480,523);
 }
 function bar(x,y,w,h,val,col,align){ctx.fillStyle='#121310';ctx.fillRect(x-2,y-2,w+4,h+4);ctx.fillStyle='#44443d';ctx.fillRect(x,y,w,h);ctx.fillStyle=col;let n=w*Math.max(0,val)/100;if(align==='right')ctx.fillRect(x+w-n,y,n,h);else ctx.fillRect(x,y,n,h)}
+// Track damage per fighter, so new rounds reset the red trail automatically.
+const hpEffects=new WeakMap();
+function healthBar(f,x,y,w,h,col,align){
+ const now=performance.now(),hp=Math.max(0,Math.min(100,f.hp/f.maxHp*100));
+ let effect=hpEffects.get(f);
+ if(!effect||hp>effect.hp){effect={hp,trail:hp,hit:-Infinity,updated:now};hpEffects.set(f,effect)}
+ if(hp<effect.hp){effect.trail=Math.max(effect.trail,effect.hp);effect.hp=hp;effect.hit=now}
+ const age=now-effect.hit,dt=Math.max(0,now-effect.updated);effect.updated=now;
+ if(age>220)effect.trail=Math.max(hp,effect.trail-dt*.065);
+ bar(x,y,w,h,hp,col,align);
+ ctx.save();
+ // The lost health stays crimson briefly before draining to the new HP value.
+ const trailWidth=w*(effect.trail-hp)/100;
+ ctx.fillStyle='#b80f2e';ctx.fillRect(align==='right'?x+w-w*effect.trail/100:x+w*hp/100,y,trailWidth,h);
+ if(age<650){
+  const fade=1-age/650,edge=align==='right'?x+w-w*hp/100:x+w*hp/100;
+  ctx.globalAlpha=fade*.55;ctx.fillStyle='#ff1744';ctx.fillRect(x,y,w,h);
+  ctx.globalAlpha=fade;ctx.strokeStyle='#ff5266';ctx.lineWidth=2;ctx.strokeRect(x-1,y-1,w+2,h+2);
+  // Small stylized blood-red droplets stay beside the bar, clear of the names.
+  ctx.fillStyle='#d81438';
+  for(let i=0;i<7;i++){const dx=(i-3)*6,drop=(age/650)*(7+i%3*4),px=Math.max(x+3,Math.min(x+w-3,edge+dx));ctx.beginPath();ctx.ellipse(px,y+h+2+drop,1.5+i%2,2+i%3,0,0,Math.PI*2);ctx.fill()}
+ }
+ ctx.restore();
+}
 // Draw player names, health, special meters, rounds and campaign level.
-function hud(){bar(42,38,365,20,p.hp,'#79d09d');bar(553,38,365,20,enemy.hp/enemy.maxHp*100,'#fa725b','right');bar(42,64,145,7,p.super,'#ffd166');bar(773,64,145,7,enemy.super,'#ffd166','right');ctx.fillStyle='#faf3df';ctx.textAlign='left';ctx.font='900 19px "Barlow Condensed",sans-serif';ctx.fillText((playerName.trim()||p.ch.name).toUpperCase(),43,29);ctx.textAlign='right';ctx.fillText((enemyPlayerName||enemy.ch.name).toUpperCase(),917,29);ctx.textAlign='center';ctx.fillStyle='#ffe8a6';ctx.font='900 23px "Barlow Condensed",sans-serif';ctx.fillText('LEVEL '+currentLevel+' / 5  ·  '+(round===3?'FINAL ROUND':'ROUND '+round),480,45);ctx.font='800 14px "DM Sans",sans-serif';ctx.fillStyle='#fff9';ctx.fillText(score[0]+'   —   '+score[1],480,68)}
+function hud(){healthBar(p,42,38,365,20,'#79d09d');healthBar(enemy,553,38,365,20,'#fa725b','right');bar(42,64,145,7,p.super,'#ffd166');bar(773,64,145,7,enemy.super,'#ffd166','right');ctx.fillStyle='#faf3df';ctx.textAlign='left';ctx.font='900 19px "Barlow Condensed",sans-serif';ctx.fillText((playerName.trim()||p.ch.name).toUpperCase(),43,29);ctx.textAlign='right';ctx.fillText((enemyPlayerName||enemy.ch.name).toUpperCase(),917,29);ctx.textAlign='center';ctx.fillStyle='#ffe8a6';ctx.font='900 23px "Barlow Condensed",sans-serif';ctx.fillText('LEVEL '+currentLevel+' / 5  ·  '+(round===3?'FINAL ROUND':'ROUND '+round),480,45);ctx.font='800 14px "DM Sans",sans-serif';ctx.fillStyle='#fff9';ctx.fillText(score[0]+'   —   '+score[1],480,68)}
 // Draw and animate a fighter according to its current action.
 function fighter(f){if(world){fighter3d(f,f===p?0:f===enemy?1:f.dir===-1?1:0);return;}ctx.save();let active=['punch','kick','super','special1','special2','grab','hurt'].includes(f.action),phase=active?Math.max(0,Math.sin(Math.PI*Math.min(1,f.timer/18))):0;let lean=0,lunge=0,bob=0;if(f.action==='punch'){lean=-.11*phase;lunge=15*phase}else if(f.action==='kick'){lean=-.18*phase;lunge=11*phase}else if(f.action==='super'||f.action==='special1'||f.action==='special2'){lean=-.22*phase;lunge=(f.action==='super'?24:18)*phase}else if(f.action==='hurt'){lean=.22*phase}else if(f.action==='ko'){lean=f.dir*.95}else if(f.action==='walk')bob=Math.sin(f.walk)*3;ctx.translate(f.x+f.dir*lunge,f.y+bob);ctx.scale(f.dir,1);ctx.rotate(lean);let col=f.ch.color,accent=f.ch.accent,skin=f.ch.skin||'#b97850',hair=f.ch.name==='Goku'&&['super','special1','special2'].includes(f.action)?'#ffd23f':f.ch.hair||f.ch.accent;ctx.globalAlpha=.27;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(0,4,43,9,0,0,7);ctx.fill();ctx.globalAlpha=1;
 // legs
